@@ -23,9 +23,6 @@ if __name__ == '__main__':
     # 定位逻辑
     locator = CrossLocator()
 
-    # 等待次数（超过阈值后，开始巡线）
-    wait_count = 0
-
     # 超时次数（超过阈值后，开始巡线）
     all_false_count = 0
 

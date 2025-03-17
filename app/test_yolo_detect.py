@@ -79,14 +79,14 @@ class State:
             return self.label["vehicle"]
 
         elif model == YoloModel.WEAPON:
-            return self.label["vehicle"]
+            return self.label["weapon"]
 
         else:
             raise RuntimeError(f"unknown model: {model}")
 
 
 if __name__ == '__main__':
-    model = YoloModel.VEHICLE
+    model = YoloModel.WEAPON
     arm_reset = {
         "left": arm_data.left_arm_clamp(),
         "right": arm_data.right_arm_clamp()

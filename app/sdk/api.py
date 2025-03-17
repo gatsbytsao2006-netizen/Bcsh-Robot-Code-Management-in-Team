@@ -11,7 +11,7 @@ class UpAPI:
     __fill_vehicle_count = 0  # Yolo 检测池加载计数
     __grayscale_record = [False] * 7  # 灰度数据缓存
 
-    def __new__(cls, yolo_model=YoloModel.VEHICLE, grayscale_threshold=3060):
+    def __new__(cls, yolo_model=YoloModel.VEHICLE, grayscale_threshold=3060, debug=False):
         if cls._instance is None:
             cls._instance = super(UpAPI, cls).__new__(cls)
 
@@ -21,6 +21,7 @@ class UpAPI:
             cls._instance.__processor = Processor(yolo_model)
 
             # 参数
+            cls._instance.__debug = debug
             cls._instance.__grayscale_threshold = grayscale_threshold  # 灰度阈值
             cls._instance.__window_name_face = "Face"
 
@@ -220,7 +221,9 @@ class UpAPI:
         """
         grayscale = self.__sensor.get_grayscale()
         analog_data = grayscale.get_grayscale_data()
-        # print(analog_data)
+
+        if self.__debug:
+            print(f"灰度传感器模拟量数据: {analog_data}")
 
         if analog_data is not None:
             digital_data = self.__adc_grayscale_data(analog_data)
@@ -259,7 +262,8 @@ class UpAPI:
         """
         data = self.get_grayscale_data()
         line_follower = self.__processor.get_line_follower()
-        return line_follower.process_frame(data)
+        offset = line_follower.process_frame(data)
+        return offset
 
     def detect_apriltag(self):
         """

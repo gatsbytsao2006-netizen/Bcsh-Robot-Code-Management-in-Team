@@ -66,6 +66,8 @@ class State:
 if __name__ == '__main__':
     interval = 0.05
 
+    target_label = "t_0"
+
     arm_reset = {
         "left": arm_data.left_arm_clamp(),
         "right": arm_data.right_arm_clamp()
@@ -85,7 +87,7 @@ if __name__ == '__main__':
 
     while True:
         # 获取数据
-        find_face, offset_x = api.detect_face(label="t_0")
+        find_face, offset_x = api.detect_face(label=target_label)
         # print(offset_x)
 
         # 更新状态
