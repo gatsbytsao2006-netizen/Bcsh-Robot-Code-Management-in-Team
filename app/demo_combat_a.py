@@ -126,6 +126,10 @@ class Controller:
         self.weapon_hit_count = 0
         self.max_weapon_hit_count = len(self.yolo_target) - 1
 
+        # 没有目标的次数
+        self.no_target_count = 0
+        self.max_no_target_count = 5
+
     def run(self):
         while True:
             # 传感器数据
@@ -282,8 +286,21 @@ class Controller:
 
                         target_name = self.yolo_target[self.weapon_hit_count]
                         find_target, offset_x = self.api.detect_yolo(label=target_name)
+
                         if find_target:
+                            print("找到目标，开始瞄准")
+
+                            self.no_target_count = 0
                             self.__aim_target(offset_x)
+
+                        else:
+                            if self.no_target_count > self.max_no_target_count:
+                                print("没有找到目标，向右移动")
+
+                                self.api.move_right(self.speed_locate_move)
+
+                            else:
+                                self.no_target_count += 1
 
                     else:
                         print(f"瞄准区域状态: {self.state_area}")
