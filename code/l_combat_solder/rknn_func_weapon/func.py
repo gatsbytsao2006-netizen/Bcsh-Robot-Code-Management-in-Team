@@ -167,7 +167,7 @@ def yolov5_post_process(input_data):
 
 
 def draw(image, boxes, scores, classes):
-    res = []
+    center_list, class_list = [], []
     image = cv2.resize(image, (640, 480))
     for box, score, cl in zip(boxes, scores, classes):
         print(cl)
@@ -180,7 +180,8 @@ def draw(image, boxes, scores, classes):
         left = int(left * 480 / 640)
         right = int(right)
         center = (int((right + top) // 2), int((bottom + left) // 2))
-        res.append(center)
+        center_list.append(center)
+        class_list.append(CLASSES[cl])
         cv2.rectangle(image, (top, left), (int(right), int(bottom)), (255, 0, 0), 2)
         cv2.putText(image, '{0} {1:.2f}'.format(CLASSES[cl], score),
                     (top, left - 6),
@@ -189,7 +190,7 @@ def draw(image, boxes, scores, classes):
         cv2.circle(image, center, 4, (0, 255, 0), 4)
         cv2.circle(image, (int(right), int(bottom)), 4, (255, 0, 0), 4)
         cv2.circle(image, (top, left), 4, (255, 0, 0), 4)
-    return image, res
+    return image, center_list, class_list
 
 
 def letterbox(im, new_shape=(640, 640), color=(0, 0, 0)):
@@ -219,7 +220,7 @@ def letterbox(im, new_shape=(640, 640), color=(0, 0, 0)):
 
 def myFunc(rknn_lite, IMG):
     image = IMG
-    center = []
+    center_list, class_list = [], []
     IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
     # print(IMG.shape)
     # 等比例缩放
@@ -243,5 +244,5 @@ def myFunc(rknn_lite, IMG):
 
     IMG = cv2.cvtColor(IMG, cv2.COLOR_RGB2BGR)
     if boxes is not None:
-        image, center = draw(IMG, boxes, scores, classes)
-    return image, center
+        image, center_list, class_list = draw(IMG, boxes, scores, classes)
+    return image, center_list, class_list

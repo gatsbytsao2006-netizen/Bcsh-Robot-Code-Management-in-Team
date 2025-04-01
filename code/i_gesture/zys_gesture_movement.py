@@ -1,9 +1,12 @@
+import time
+
 import cv2
 import mediapipe as mp
 import math
 import sys
+
 sys.path.append("..")
-from uprobot_movement import Movement 
+from uprobot_movement import Movement
 
 draw = mp.solutions.drawing_utils
 hands = mp.solutions.hands.Hands(
@@ -12,11 +15,21 @@ hands = mp.solutions.hands.Hands(
     min_detection_confidence=0.75,
     min_tracking_confidence=0.75)
 
+arm_actions = {
+    "clamp": [2048, 2048, 620, 2670, 600, 2048, 3500, 1400],
+    "hover": [2150, 2200, 600, 2200, 2150, 2150, 3300, 2200],
+    "hit": [2048, 2048, 620, 2670, 3000, 1800, 3500, 2050],
+}
+
+defense = False
+attack = False
+
 movement = Movement()
+
 
 def findHind(img, hands, draw):
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # 转换为RGB
-	
+
     handlmsstyle = draw.DrawingSpec(color=(0, 0, 255), thickness=5)
     handconstyle = draw.DrawingSpec(color=(0, 255, 0), thickness=5)
 
@@ -64,12 +77,12 @@ def detectNumber(hand_landmarks, img):
     pinky_mcp_x = hand_landmark[pinky_finger_mcp_id].x * w
     wrist_x = hand_landmark[wrist_id].x * w
 
-    dist_thumb2wrist = math.sqrt((thumb_tip_x - wrist_x)**2 + (thumb_tip_y - wrist_y)**2)
+    dist_thumb2wrist = math.sqrt((thumb_tip_x - wrist_x) ** 2 + (thumb_tip_y - wrist_y) ** 2)
     dist_index2wrist = math.sqrt((index_tip_x - wrist_x) ** 2 + (index_tip_y - wrist_y) ** 2)
     dist_middle2wrist = math.sqrt((middle_tip_x - wrist_x) ** 2 + (middle_tip_y - wrist_y) ** 2)
     dist_ring2wrist = math.sqrt((ring_tip_x - wrist_x) ** 2 + (ring_tip_y - wrist_y) ** 2)
     dist_pinky2wrist = math.sqrt((pinky_tip_x - wrist_x) ** 2 + (pinky_tip_y - wrist_y) ** 2)
-    dist_pinky_mcp2wrist = math.sqrt((thumb_tip_x - pinky_mcp_x)**2 + (thumb_tip_y - pinky_mcp_y)**2)
+    dist_pinky_mcp2wrist = math.sqrt((thumb_tip_x - pinky_mcp_x) ** 2 + (thumb_tip_y - pinky_mcp_y) ** 2)
 
     # 相当于取dist_thumb2wrist_ratio == 1
     dist_index2wrist_ratio = dist_index2wrist / dist_thumb2wrist
@@ -98,33 +111,45 @@ def detectNumber(hand_landmarks, img):
         return -1
 
 
-
 cap = cv2.VideoCapture(0)
 
-cv2.namedWindow('MediaPipe Hands', cv2.WINDOW_NORMAL) 
+cv2.namedWindow('MediaPipe Hands', cv2.WINDOW_NORMAL)
 
 while True:
-    
+
     ret, frame = cap.read()
     frame = cv2.resize(frame, (640, 480))
-    
+
     hands_landmarks = findHind(frame, hands, draw)
-    
+
     if hands_landmarks:
         # 调用detectNumber函数
         resultNumber = detectNumber(hands_landmarks, frame)
-        if (resultNumber >= 0):
+        if resultNumber >= 0:
             cv2.putText(frame, str(resultNumber), (150, 150), 19, 5, (255, 0, 255), 5, cv2.LINE_AA)
-            if(resultNumber == 5):
+            if resultNumber == 5:
+                defense = False
+                if not attack:
+                    movement.call_servo_control(arm_actions["hit"], 10)
+                    time.sleep(2.0)
+                    attack = True
                 movement.move_forward(10)
-            elif (resultNumber == 0):
+            elif resultNumber == 0:
+                attack = False
+                if not defense:
+                    movement.call_servo_control(arm_actions["hover"], 10)
+                    time.sleep(2.0)
+                    defense = True
                 movement.move_backward(10)
+            else:
+                attack = False
+                defense = False
         else:
             cv2.putText(frame, "NO NUMBER", (150, 150), 20, 1, (0, 0, 255))
-            
+
     cv2.imshow('MediaPipe Hands', frame)
-    
+
     if cv2.waitKey(1) & 0xFF == 27:
         break
-    
+
 cap.release()

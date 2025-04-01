@@ -1,20 +1,32 @@
-import dlib                     #人脸识别的库dlib
-import numpy as np              #数据处理的库numpy
-import cv2                      #图像处理的库Opencv
+import time
+
+import dlib  # 人脸识别的库dlib
+import numpy as np  # 数据处理的库numpy
+import cv2  # 图像处理的库Opencv
 
 import sys
+
 sys.path.append("..")
 from uprobot_movement import Movement
+
 
 class Face_Emotion():
 
     def __init__(self):
+        self.arm_actions = {
+            "clamp": [2048, 2048, 620, 2670, 600, 2048, 3500, 1400],
+            "right_up": [2048, 2048, 620, 2670, 2150, 2200, 3600, 2900],
+            "open": [2140, 3440, 1900, 2200, 3400, 600, 2030, 2200]
+        }
+        self.open_arm = False
+        self.up_arm = False
+
         # 使用特征提取器get_frontal_face_detector
         self.detector = dlib.get_frontal_face_detector()
-        
+
         # dlib的68点模型，使用作者训练好的特征预测器
         modelPath = sys.path[0] + "/shape_predictor_68_face_landmarks.dat"
-        
+
         self.predictor = dlib.shape_predictor(modelPath)
 
         self.movement = Movement()
@@ -23,10 +35,10 @@ class Face_Emotion():
         self.cap = cv2.VideoCapture(0)
 
         # 设置一个窗口来显示图像  
-        self.result_name = "Emotion Detect Image" 
-        
-        cv2.namedWindow(self.result_name, cv2.WINDOW_NORMAL) 
-        
+        self.result_name = "Emotion Detect Image"
+
+        cv2.namedWindow(self.result_name, cv2.WINDOW_NORMAL)
+
         if not self.cap.isOpened():
             self.isOpen = False
             print("无法打开摄像头,请检查线路连接!!!")
@@ -34,15 +46,17 @@ class Face_Emotion():
             self.isOpen = True
             print("成功打开摄像头")
 
-        if(self.isOpen):
-            
-            while(True):
-                
+        self.movement.call_servo_control(self.arm_actions["clamp"], 10)
+        time.sleep(2.0)
+
+        if self.isOpen:
+
+            while True:
+
                 ret, frame = self.cap.read()
                 frame = cv2.resize(frame, (640, 480))
-                
+
                 if (ret):
-                
                     result = self.update_frame(frame)
                     cv2.imshow(self.result_name, result)
 
@@ -50,7 +64,6 @@ class Face_Emotion():
                 if key == ord('q'):  # 如果按下'q'键，则退出循环  
                     self.cleanup()
                     break
-   
 
     def update_frame(self, frame):
 
@@ -104,7 +117,7 @@ class Face_Emotion():
                         tempx = np.array(line_brow_x)
                         tempy = np.array(line_brow_y)
                         z1 = np.polyfit(tempx, tempy, 1)  # 拟合成一次直线
-                        self.brow_k = -round(z1[0], 3)  # 拟合出曲线的斜率和实际眉毛的倾斜方向是相反的
+                        brow_k = -round(z1[0], 3)  # 拟合出曲线的斜率和实际眉毛的倾斜方向是相反的
 
                         brow_hight = (brow_sum / 10) / self.face_width  # 眉毛高度占比
                         brow_width = (frown_sum / 5) / self.face_width  # 眉毛距离占比
@@ -121,25 +134,37 @@ class Face_Emotion():
                         # 张嘴，可能是开心或者惊讶
                         if round(mouth_higth >= 0.03):
                             if eye_hight >= 0.056:
-                                cv2.putText(result, "amazing", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                                cv2.putText(result, "amazing", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX,
+                                            0.8,
                                             (0, 0, 255), 2, 4)
                                 # 机器人右转
                                 self.movement.turn_right(10)
+                                self.up_arm = False
                             else:
                                 cv2.putText(result, "happy", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                                             (0, 0, 255), 2, 4)
                                 # 机器人走向使用者
+                                if not self.up_arm:
+                                    self.movement.call_servo_control(self.arm_actions["right_up"], 10)
+                                    time.sleep(2.0)
+                                    self.up_arm = True
                                 self.movement.move_forward(10)
 
                         # 没有张嘴，可能是正常和生气
                         else:
-                            if self.brow_k <= -0.3:
+                            if brow_k < 0:
                                 cv2.putText(result, "angry", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                                             (0, 0, 255), 2, 4)
                                 # 机器人远离使用者
+                                if not self.open_arm:
+                                    self.movement.call_servo_control(self.arm_actions["open"], 10)
+                                    time.sleep(2.0)
+                                    self.open_arm = True
                                 self.movement.move_backward(10)
                             else:
-                                cv2.putText(result, "nature", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                                self.open_arm = False
+                                cv2.putText(result, "nature", (d.left(), d.bottom() + 20), cv2.FONT_HERSHEY_SIMPLEX,
+                                            0.8,
                                             (0, 0, 255), 2, 4)
         else:
             # 没有检测到1人脸
@@ -147,10 +172,9 @@ class Face_Emotion():
 
         return result
 
-
-    def cleanup(self):  
+    def cleanup(self):
         # 关闭OpenCV窗口  
-        cv2.destroyAllWindows() 
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

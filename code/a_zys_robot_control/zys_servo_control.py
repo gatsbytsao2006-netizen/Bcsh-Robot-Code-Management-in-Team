@@ -5,35 +5,35 @@ from uprobot_movement import Movement
 import time
 
 if __name__ == '__main__':
-    #init movement
+    # init movement
     mv = Movement()
     
     print("Left UP Right Down !!!")
-    servo_position = [0, 0, 0, 1100, 0, 0, 0, 1300]
+    servo_position = [2150, 2150, 650, 1200, 2150, 2200, 3600, 1400]
     run_time = 10
     mv.call_servo_control(servo_position, run_time)
     time.sleep(5.0)
 
     print("Left Down Right Up !!!")
-    servo_position = [0, 0, 0, 2700, 0, 0, 0, 3000]
+    servo_position = [2150, 2150, 650, 2670, 2150, 2200, 3600, 2900]
     run_time = 10
     mv.call_servo_control(servo_position, run_time)
     time.sleep(5.0)
 
     print("Both UP !!!")
-    servo_position = [0, 0, 0, 1100, 0, 0, 0, 3000]
+    servo_position = [2150, 2150, 650, 1200, 2150, 2200, 3600, 2900]
     run_time = 10
     mv.call_servo_control(servo_position, run_time)
     time.sleep(5.0)
     
     print("Hover !!!")
-    servo_position = [0, 0, 0, 1900, 0, 0, 0, 2150]
+    servo_position = [2150, 2200, 600, 2200, 2150, 2150, 3300, 2200]
     run_time = 10
     mv.call_servo_control(servo_position, run_time)
     time.sleep(5.0)
     
     print("Open Arm !!!")
-    servo_position = [0, 0, 1900, 1900, 0, 0, 1900, 2150]
+    servo_position = [2140, 3440, 1900, 2200, 3400, 600, 2030, 2200]
     run_time = 10
     mv.call_servo_control(servo_position, run_time)
     time.sleep(5.0)    
