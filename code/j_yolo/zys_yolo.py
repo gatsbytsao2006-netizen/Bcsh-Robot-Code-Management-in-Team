@@ -1,6 +1,5 @@
 import cv2
 import sys
-import sys
 sys.path.append("..")
 
 import time
