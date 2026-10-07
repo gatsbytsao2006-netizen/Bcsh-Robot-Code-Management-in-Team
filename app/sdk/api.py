@@ -11,7 +11,7 @@ class UpAPI:
     __fill_vehicle_count = 0  # Yolo 检测池加载计数
     __grayscale_record = [False] * 7  # 灰度数据缓存
 
-    def __new__(cls, yolo_model=YoloModel.VEHICLE, grayscale_threshold=1000, debug=True):## 3060->500
+    def __new__(cls, yolo_model=YoloModel.VEHICLE, grayscale_threshold=500, debug=True):## 3060->500
         if cls._instance is None:
             cls._instance = super(UpAPI, cls).__new__(cls)
 
