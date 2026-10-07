@@ -49,7 +49,7 @@ class AreaState(Enum):
 class Controller:
     def __init__(self):
         # 参数设置
-        self.grayscale_threshold = 3060  # 灰度传感器黑色检测阈值
+        self.grayscale_threshold = 1000  # 灰度传感器黑色检测阈值
 
         self.speed_follow_line = 16  # 巡线前进移动速度
         self.turn_ratio = 8  # 巡线矫正移动速度

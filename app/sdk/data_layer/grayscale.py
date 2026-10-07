@@ -8,7 +8,7 @@ class Grayscale:
         'get_grayscale_data': 0x14,
     }
 
-    def __init__(self, serial_port, threshold=3000):
+    def __init__(self, serial_port, threshold=300):## 3000->300
         self.communicator = GrayscaleCommunicator(serial_port)
         self.threshold = threshold
 

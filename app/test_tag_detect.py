@@ -22,7 +22,7 @@ if __name__ == '__main__':
                 api.raise_right_arm()
 
             elif tag_id == raise_arms_id:
-                api.raise_arms()
+                 api.open_arms()
 
             else:
                 api.put_down_arms()

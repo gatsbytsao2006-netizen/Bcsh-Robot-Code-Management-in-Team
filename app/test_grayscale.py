@@ -2,7 +2,7 @@ from sdk.api import UpAPI
 import time
 
 if __name__ == '__main__':
-    api = UpAPI()
+    api = UpAPI(grayscale_threshold=650)
 
     while True:
         data = api.get_grayscale_data()

@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     while True:
         grayscale_data = api.get_grayscale_data()
+        print(f"grayscale_data: {grayscale_data}")
 
         if state == State.LINE:
             print("巡线前进")

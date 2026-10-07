@@ -7,8 +7,8 @@ if __name__ == '__main__':
     move_speed = 16
 
     k_p = 20
-    k_i = 0
-    k_d = 1
+    k_i = 0.0
+    k_d = 1.0
 
     # 传感器 逻辑处理器 执行器
     api = UpAPI()

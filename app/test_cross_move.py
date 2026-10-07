@@ -41,6 +41,7 @@ if __name__ == '__main__':
     while True:
         grayscale_data = api.get_grayscale_data()
 
+
         if state_main == StateMain.SET_OUT:
             if short_stop.complete():
                 if locator.leave_cross(grayscale_data):

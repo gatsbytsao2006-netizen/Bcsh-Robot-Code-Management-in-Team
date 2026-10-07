@@ -12,7 +12,7 @@ class Controller:
     def __init__(self):
         self.state = self.IDLE
         self.start_action_time = get_time_ms()
-        self.action_interval = 1000
+        self.action_interval = 3000
 
     def update(self):
         if self.state == self.IDLE:

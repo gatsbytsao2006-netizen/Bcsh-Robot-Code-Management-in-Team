@@ -76,7 +76,7 @@ class SpanState(Enum):
 class Controller:
     def __init__(self):
         # 参数设置
-        self.grayscale_threshold = 3240  # 灰度传感器检测阈值
+        self.grayscale_threshold = 500 # 灰度传感器检测阈值
 
         self.speed_follow_line = 10  # 巡线前进移动速度
         self.speed_move_in_white = 8  # 在白色区域前进移动速度
